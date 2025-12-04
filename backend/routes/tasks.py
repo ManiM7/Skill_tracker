@@ -134,6 +134,5 @@ def delete_task(task_id):
     if deleted_count == 0:
         return jsonify({"error": "Task not found"}), 404
 
-    # Can be 204 (no body) or 200 with message
     return jsonify({"message": "Task deleted"}), 200
 
