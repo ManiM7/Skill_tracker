@@ -1,0 +1,139 @@
+/* ===== TASK LIST CARD (inside TasksTab) ===== */
+
+.task-list-container {
+  margin-top: 16px;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 18px 22px;
+}
+
+/* Remove default list styling */
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* One row */
+.task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 4px;
+}
+
+/* Divider between rows */
+.task-row + .task-row {
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Left side: icon + text */
+.task-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Status icon */
+.task-status-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid #9ca3af;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.task-status-icon--done {
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+/* Main text */
+.task-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.task-title--completed {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+/* Category / status pills */
+.task-tags {
+  display: flex;
+  gap: 8px;
+}
+
+.task-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.task-pill-category {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.task-pill-status {
+  background: #111827;
+  color: #ffffff;
+}
+
+.task-pill-status--completed {
+  background: #111827;
+}
+
+.task-pill-status--pending {
+  background: #f97316;
+}
+
+/* Right-side icons */
+.task-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-icon-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  color: #4b5563;
+  transition: color 0.15s ease, transform 0.05s ease;
+}
+
+.task-icon-btn:hover {
+  color: #111827;
+}
+
+.task-icon-btn:active {
+  transform: translateY(1px);
+}
+
+.task-icon-btn--danger {
+  color: #ef4444;
+}
+
+.task-icon-btn--danger:hover {
+  color: #b91c1c;
+}
