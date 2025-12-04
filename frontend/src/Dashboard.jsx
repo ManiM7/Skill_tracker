@@ -106,7 +106,6 @@ try {
   return (
     <div className="dash-root">
       <div className="dash-container">
-        {/* Header */}
         <header className="dash-header">
           <div>
             <h1 className="dash-title">Task &amp; Skill Tracker</h1>
@@ -116,13 +115,7 @@ try {
             </p>
           </div>
           <div className="dash-header-actions">
-            {/* <button
-              type="button"
-              className="secondary-btn"
-              onClick={handleManageCategories}
-            >
-              ⚙️&nbsp; Manage Categories
-            </button> */}
+            
             <button
               type="button"
               className="secondary-btn"
@@ -133,7 +126,7 @@ try {
           </div>
         </header>
 
-        {/* Tabs */}
+
         <div className="dash-tabs-row">
           <button
             type="button"
@@ -155,7 +148,7 @@ try {
           </button>
         </div>
 
-        {/* New Task */}
+
         <div className="dash-top-actions">
           <button
             type="button"
@@ -169,7 +162,7 @@ try {
         <main className="dash-main">
           {activeTab === "dashboard" ? (
             <>
-              {/* Stats row */}
+
               <div className="dash-card dash-stats-card">
                 <div className="dash-stats-row">
                   <div className="dash-stat-card">
@@ -201,9 +194,7 @@ try {
                 </div>
               </div>
 
-              {/* Charts */}
               <div className="dash-card dash-charts-row">
-                {/* Bar chart */}
                 <div className="dash-chart">
                   <h3 className="dash-chart-title">
                     Tasks by Skill Category
@@ -239,8 +230,6 @@ try {
                     </div>
                   )}
                 </div>
-
-                {/* Pie chart */}
                 <div className="dash-chart">
                   <h3 className="dash-chart-title">Task Distribution</h3>
                   <p className="dash-chart-subtitle">

@@ -5,12 +5,12 @@ const API_BASE = "http://localhost:5000";
 const STORAGE_KEY = "task_skill_user";
 
 function App() {
-  const [mode, setMode] = useState("login"); // "login" | "register"
+  const [mode, setMode] = useState("login"); // 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [user, setUser] = useState(null); // logged-in user
+  const [user, setUser] = useState(null); 
 
   // 🔹 Load user from localStorage on first render
   useEffect(() => {
@@ -27,7 +27,7 @@ function App() {
     }
   }, []);
 
-  // 🔹 Save user to localStorage whenever it changes
+
   useEffect(() => {
     if (user) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
@@ -50,7 +50,7 @@ function App() {
           setMessage(data.error || "Login failed");
           return;
         }
-        setUser(data); // will also be stored in localStorage by useEffect
+        setUser(data);
       } else {
         const res = await fetch(`${API_BASE}/auth/register`, {
           method: "POST",
@@ -75,7 +75,7 @@ function App() {
     setPassword("");
     setMessage("Logged out");
     setMode("login");
-    localStorage.removeItem(STORAGE_KEY); // 🔹 clear stored user
+    localStorage.removeItem(STORAGE_KEY); 
   }
 
   // If logged in → show dashboard
@@ -83,7 +83,7 @@ function App() {
     return <Dashboard user={user} onLogout={handleLogout} />;
   }
 
-  // Otherwise show auth card
+  // Otherwise show authe card
   return (
     <div className="app-root">
       <div className="auth-card">

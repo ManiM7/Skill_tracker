@@ -1,19 +1,16 @@
-// src/TasksTab.jsx
 import { useState, useMemo } from "react";
 
 const API_BASE = "http://localhost:5000";
 
 function TasksTab({ tasks, user, onChanged }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all"); // "all" | "pending" | "completed"
+  const [statusFilter, setStatusFilter] = useState("all"); 
 
-  // Unique categories for dropdown
   const uniqueCategories = useMemo(
     () => Array.from(new Set(tasks.map((t) => t.category || "Other"))),
     [tasks]
   );
 
-  // Filtered tasks
   const filteredTasks = useMemo(
     () =>
       tasks.filter((t) => {
@@ -34,7 +31,6 @@ function TasksTab({ tasks, user, onChanged }) {
     [tasks, categoryFilter, statusFilter]
   );
 
-  // 🔁 Toggle between pending (todo) and completed (done)
   async function handleToggleStatus(task) {
     const isDone = task.status === "done";
     const newStatus = isDone ? "todo" : "done";
@@ -54,14 +50,13 @@ function TasksTab({ tasks, user, onChanged }) {
         return;
       }
 
-      if (onChanged) onChanged(); // reload tasks in parent
+      if (onChanged) onChanged(); 
     } catch (err) {
       console.error("Error updating status", err);
       alert("Server error updating task status");
     }
   }
 
-  // 🗑 Delete task completely
   async function handleDeleteTask(task) {
     const sure = window.confirm(
       `Are you sure you want to delete "${task.title}"?`
@@ -75,14 +70,14 @@ function TasksTab({ tasks, user, onChanged }) {
           "X-User-Id": user.id,
         },
       });
-      const data = await res.json().catch(() => ({})); // in case no body
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
         alert(data.error || "Error deleting task");
         return;
       }
 
-      if (onChanged) onChanged(); // reload tasks in parent (Dashboard)
+      if (onChanged) onChanged(); 
     } catch (err) {
       console.error("Error deleting task", err);
       alert("Server error deleting task");
@@ -91,7 +86,6 @@ function TasksTab({ tasks, user, onChanged }) {
 
   return (
     <div className="dash-card">
-      {/* Header */}
       <div className="dash-card-header-row">
         <div>
           <h2 className="dash-card-title">Task List</h2>
@@ -101,7 +95,6 @@ function TasksTab({ tasks, user, onChanged }) {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="dash-filters-row">
         <div className="dash-filter-group">
           <label className="dash-filter-label">Filter by Category</label>
@@ -132,8 +125,6 @@ function TasksTab({ tasks, user, onChanged }) {
           </select>
         </div>
       </div>
-
-      {/* List */}
       {filteredTasks.length === 0 ? (
         <div className="dash-empty-wrapper">
           <p className="dash-empty-text">
@@ -147,7 +138,6 @@ function TasksTab({ tasks, user, onChanged }) {
               const isDone = t.status === "done";
               return (
                 <li key={t.id} className="task-row">
-                  {/* Left: status + text */}
                   <div className="task-row-left">
                     <span
                       className={
@@ -191,19 +181,7 @@ function TasksTab({ tasks, user, onChanged }) {
                       </div>
                     </div>
                   </div>
-
-                  {/* Right: edit/delete icons */}
                   <div className="task-row-actions">
-                    {/* <button
-                      type="button"
-                      className="task-icon-btn"
-                      title="Edit task"
-                      onClick={() =>
-                        alert(`Edit API not implemented yet for ${t.title}`)
-                      }
-                    >
-                      ✏
-                    </button> */}
                     <button
                       type="button"
                       className="task-icon-btn task-icon-btn--danger"
