@@ -11,28 +11,50 @@ import {
   Cell,
   ResponsiveContainer,
 } from "recharts";
+
 import TasksTab from "./TasksTab";
+import NewTaskModal from "./NewTaskModal";
 
 const API_BASE = "http://localhost:5000";
 const PIE_COLORS = ["#3b82f6", "#22c55e", "#f97316", "#a855f7", "#ec4899"];
+const STORAGE_TOKEN = "task_skill_token";
+
+
+  //  Helper: JWT Authorization Header
+
+   function getAuthHeaders() {
+  const token = localStorage.getItem(STORAGE_TOKEN);
+  const headers = { "Content-Type": "application/json" };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+}
 
 function Dashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [tasks, setTasks] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+
+
+    //  Load Tasks
 
   async function loadTasks() {
     try {
       const res = await fetch(`${API_BASE}/tasks`, {
-        headers: { "X-User-Id": user.id },
+        method: "GET",
+        headers: getAuthHeaders(),
       });
+
       const data = await res.json();
       if (!res.ok) {
-        console.error(data);
+        alert(data.error || "Failed to load tasks");
         return;
       }
       setTasks(data);
     } catch (err) {
-      console.error("Error loading tasks", err);
+      console.error(err);
+      alert("Network error while loading tasks");
     }
   }
 
@@ -40,54 +62,28 @@ function Dashboard({ user, onLogout }) {
     loadTasks();
   }, []);
 
-  async function handleNewTask() {
-    const title = window.prompt("Task title (e.g. React practice)");
-    if (!title) return;
-
-    const category =
-      window.prompt("Skill / Category (e.g. React, Java, DSA)") || "General";
-
-    
-      const status = "todo";
-
-try {
-  const res = await fetch(`${API_BASE}/tasks`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-User-Id": user.id,
-    },
-    body: JSON.stringify({ title, category, status }),
-  });
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.error || "Error creating task");
-        return;
-      }
-      loadTasks();
-      setActiveTab("dashboard");
-    } catch (err) {
-      console.error("Error adding task", err);
-    }
-  }
-
-  function handleManageCategories() {
-    alert("Manage Categories page coming soon!");
-  }
-
-  // ====== Stats ======
+  /* ===============================
+     Stats
+  ================================ */
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.status === "done").length;
   const pendingTasks = totalTasks - completedTasks;
   const completionRate =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  // ====== Chart data by category ======
+  /* ===============================
+     Chart Data by Category
+  ================================ */
   const categoryMap = {};
   tasks.forEach((t) => {
     const cat = t.category || "Other";
     if (!categoryMap[cat]) {
-      categoryMap[cat] = { category: cat, completed: 0, pending: 0, total: 0 };
+      categoryMap[cat] = {
+        category: cat,
+        completed: 0,
+        pending: 0,
+        total: 0,
+      };
     }
     categoryMap[cat].total += 1;
     if (t.status === "done") {
@@ -97,39 +93,37 @@ try {
     }
   });
 
-  const skillChartData = Object.values(categoryMap);
-  const pieData = skillChartData.map((c) => ({
+  const barData = Object.values(categoryMap);
+  const pieData = barData.map((c) => ({
     name: c.category,
     value: c.total,
   }));
 
+  /* ===============================
+     UI
+  ================================ */
   return (
     <div className="dash-root">
       <div className="dash-container">
+        {/* ===== Header ===== */}
         <header className="dash-header">
           <div>
             <h1 className="dash-title">Task &amp; Skill Tracker</h1>
             <p className="dash-subtitle">
-              Welcome back,{" "}
-              <span className="dash-username">{user.username}</span>!
+              Welcome back, <span className="dash-username">{user.username}</span>!
             </p>
           </div>
+
           <div className="dash-header-actions">
-            
-            <button
-              type="button"
-              className="secondary-btn"
-              onClick={onLogout}
-            >
-              ↩&nbsp; Logout
+            <button className="secondary-btn" onClick={onLogout}>
+              ↩ Logout
             </button>
           </div>
         </header>
 
-
+        {/* ===== Tabs ===== */}
         <div className="dash-tabs-row">
           <button
-            type="button"
             className={`dash-tab-btn ${
               activeTab === "dashboard" ? "active" : ""
             }`}
@@ -138,7 +132,6 @@ try {
             Dashboard
           </button>
           <button
-            type="button"
             className={`dash-tab-btn ${
               activeTab === "tasks" ? "active" : ""
             }`}
@@ -148,21 +141,18 @@ try {
           </button>
         </div>
 
-
+        {/* ===== New Task Button ===== */}
         <div className="dash-top-actions">
-          <button
-            type="button"
-            className="primary-btn"
-            onClick={handleNewTask}
-          >
+          <button className="primary-btn" onClick={() => setShowModal(true)}>
             <span className="primary-btn-icon">+</span> New Task
           </button>
         </div>
 
+        {/* ===== Main ===== */}
         <main className="dash-main">
           {activeTab === "dashboard" ? (
             <>
-
+              {/* ===== Stats ===== */}
               <div className="dash-card dash-stats-card">
                 <div className="dash-stats-row">
                   <div className="dash-stat-card">
@@ -194,89 +184,81 @@ try {
                 </div>
               </div>
 
+              {/* ===== Charts ===== */}
               <div className="dash-card dash-charts-row">
                 <div className="dash-chart">
-                  <h3 className="dash-chart-title">
-                    Tasks by Skill Category
-                  </h3>
+                  <h3 className="dash-chart-title">Tasks by Skill Category</h3>
                   <p className="dash-chart-subtitle">
-                    Comparison of completed vs pending tasks
+                    Completed vs Pending tasks
                   </p>
 
-                  {skillChartData.length === 0 ? (
+                  {barData.length === 0 ? (
                     <p className="dash-empty-text">
-                      No tasks yet. Create your first task to see this chart.
+                      No tasks yet. Create your first task.
                     </p>
                   ) : (
-                    <div className="dash-chart-inner">
-                      <ResponsiveContainer width="100%" height={260}>
-                        <BarChart data={skillChartData}>
-                          <XAxis dataKey="category" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Bar
-                            dataKey="completed"
-                            name="Completed"
-                            fill="#22c55e"
-                          />
-                          <Bar
-                            dataKey="pending"
-                            name="Pending"
-                            fill="#f97316"
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                    <ResponsiveContainer width="100%" height={260}>
+                      <BarChart data={barData}>
+                        <XAxis dataKey="category" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="completed" fill="#22c55e" />
+                        <Bar dataKey="pending" fill="#f97316" />
+                      </BarChart>
+                    </ResponsiveContainer>
                   )}
                 </div>
+
                 <div className="dash-chart">
                   <h3 className="dash-chart-title">Task Distribution</h3>
                   <p className="dash-chart-subtitle">
-                    Total tasks per skill category
+                    Total tasks per skill
                   </p>
 
                   {pieData.length === 0 ? (
                     <p className="dash-empty-text">
-                      No tasks yet. Create your first task to see this chart.
+                      No tasks yet. Create your first task.
                     </p>
                   ) : (
-                    <div className="dash-chart-inner dash-chart-inner--pie">
-                      <ResponsiveContainer width="100%" height={260}>
-                        <PieChart>
-                          <Pie
-                            data={pieData}
-                            dataKey="value"
-                            nameKey="name"
-                            outerRadius={90}
-                            label={(entry) =>
-                              `${entry.name}: ${entry.value}`
-                            }
-                          >
-                            {pieData.map((entry, index) => (
-                              <Cell
-                                key={`cell-${entry.name}`}
-                                fill={
-                                  PIE_COLORS[index % PIE_COLORS.length]
-                                }
-                              />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
+                    <ResponsiveContainer width="100%" height={260}>
+                      <PieChart>
+                        <Pie
+                          data={pieData}
+                          dataKey="value"
+                          nameKey="name"
+                          outerRadius={90}
+                          label
+                        >
+                          {pieData.map((_, i) => (
+                            <Cell
+                              key={i}
+                              fill={PIE_COLORS[i % PIE_COLORS.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
                   )}
                 </div>
               </div>
             </>
           ) : (
-            <TasksTab tasks={tasks}  user={user} onChanged={loadTasks}  />
+            <TasksTab tasks={tasks} user={user} onChanged={loadTasks} />
           )}
         </main>
       </div>
+
+      {/* ===== New Task Modal ===== */}
+      {showModal && (
+        <NewTaskModal
+          onClose={() => setShowModal(false)}
+          onCreated={loadTasks}
+        />
+      )}
     </div>
   );
-
 }
+
 export default Dashboard;

@@ -1,10 +1,5 @@
 import psycopg2
-
-DB_HOST = "localhost"
-DB_NAME = "tracker_db"
-DB_USER = "postgres"
-DB_PASS = "Mani2605#"
-DB_PORT = "5432"
+from config import DB_HOST, DB_NAME, DB_USER, DB_PASS, DB_PORT
 
 def get_connection():
     return psycopg2.connect(

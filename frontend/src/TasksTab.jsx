@@ -1,10 +1,22 @@
 import { useState, useMemo } from "react";
 
 const API_BASE = "http://localhost:5000";
+const STORAGE_TOKEN = "task_skill_token";
+
+// 🔹 Helper – same idea as in Dashboard.jsx
+function getAuthHeaders() {
+  const token = localStorage.getItem(STORAGE_TOKEN);
+  const base = { "Content-Type": "application/json" };
+  if (!token) return base;
+  return {
+    ...base,
+    Authorization: `Bearer ${token}`,
+  };
+}
 
 function TasksTab({ tasks, user, onChanged }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all"); 
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const uniqueCategories = useMemo(
     () => Array.from(new Set(tasks.map((t) => t.category || "Other"))),
@@ -38,10 +50,7 @@ function TasksTab({ tasks, user, onChanged }) {
     try {
       const res = await fetch(`${API_BASE}/tasks/${task.id}/status`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-User-Id": user.id,
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ status: newStatus }),
       });
       const data = await res.json();
@@ -50,7 +59,7 @@ function TasksTab({ tasks, user, onChanged }) {
         return;
       }
 
-      if (onChanged) onChanged(); 
+      if (onChanged) onChanged();
     } catch (err) {
       console.error("Error updating status", err);
       alert("Server error updating task status");
@@ -66,9 +75,7 @@ function TasksTab({ tasks, user, onChanged }) {
     try {
       const res = await fetch(`${API_BASE}/tasks/${task.id}`, {
         method: "DELETE",
-        headers: {
-          "X-User-Id": user.id,
-        },
+        headers: getAuthHeaders(), // no need for body
       });
       const data = await res.json().catch(() => ({}));
 
@@ -77,7 +84,7 @@ function TasksTab({ tasks, user, onChanged }) {
         return;
       }
 
-      if (onChanged) onChanged(); 
+      if (onChanged) onChanged();
     } catch (err) {
       console.error("Error deleting task", err);
       alert("Server error deleting task");
@@ -125,6 +132,7 @@ function TasksTab({ tasks, user, onChanged }) {
           </select>
         </div>
       </div>
+
       {filteredTasks.length === 0 ? (
         <div className="dash-empty-wrapper">
           <p className="dash-empty-text">

@@ -67,3 +67,4 @@ def login():
         return jsonify({"error": "Invalid email or password"}), 401
 
     return jsonify({"id": user_id, "username": username, "email": email}), 200
+

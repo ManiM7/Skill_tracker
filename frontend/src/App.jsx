@@ -1,38 +1,39 @@
 import { useState, useEffect } from "react";
+import { Routes, Route } from "react"
 import Dashboard from "./Dashboard";
+import NewTaskModal from "./NewTaskModal";
 
 const API_BASE = "http://localhost:5000";
-const STORAGE_KEY = "task_skill_user";
+const STORAGE_USER = "task_skill_user";
+const STORAGE_TOKEN = "task_skill_token";
 
 function App() {
-  const [mode, setMode] = useState("login"); // 
+  const [mode, setMode] = useState("login"); // "login" | "register"
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [user, setUser] = useState(null); 
 
-  // 🔹 Load user from localStorage on first render
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true); // ✅ IMPORTANT
+
+  /* =========================
+     RESTORE SESSION ON REFRESH
+  ========================== */
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && parsed.id && parsed.email) {
-          setUser(parsed);
-        }
-      }
-    } catch (err) {
-      console.error("Error reading stored user", err);
-    }
-  }, []);
+  try {
+    const storedUser = localStorage.getItem(STORAGE_USER);
+    const token = localStorage.getItem(STORAGE_TOKEN);
 
-
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    if (storedUser && token) {
+      setUser(JSON.parse(storedUser));
     }
-  }, [user]);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setAuthLoading(false);
+  }
+}, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -45,24 +46,37 @@ function App() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
+
         const data = await res.json();
+
         if (!res.ok) {
           setMessage(data.error || "Login failed");
           return;
         }
-        setUser(data);
+
+        const { user: loggedUser, accessToken } = data;
+
+        localStorage.setItem(STORAGE_TOKEN, accessToken);
+        localStorage.setItem(STORAGE_USER, JSON.stringify(loggedUser));
+        setUser(loggedUser);
+        setMessage("Logged in successfully");
       } else {
         const res = await fetch(`${API_BASE}/auth/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, email, password }),
         });
+
         const data = await res.json();
+
         if (!res.ok) {
           setMessage(data.error || "Registration failed");
           return;
         }
-        setUser(data);
+
+        setMessage("Registered successfully. Please login.");
+        setMode("login");
+        setPassword("");
       }
     } catch (err) {
       console.error(err);
@@ -70,20 +84,42 @@ function App() {
     }
   }
 
+  /* =========================
+     LOGOUT
+  ========================== */
   function handleLogout() {
     setUser(null);
     setPassword("");
-    setMessage("Logged out");
     setMode("login");
-    localStorage.removeItem(STORAGE_KEY); 
+    setMessage("Logged out");
+    localStorage.removeItem(STORAGE_USER);
+    localStorage.removeItem(STORAGE_TOKEN);
   }
 
-  // If logged in → show dashboard
-  if (user) {
+  /* =========================
+     🔒 STEP 3 — BLOCK UI
+  ========================== */
+  if (authLoading) {
+    return (
+      <div className="app-root">
+        <p style={{ textAlign: "center", marginTop: "40vh" }}>
+          Loading...
+        </p>
+      </div>
+    );
+  }
+
+  /* =========================
+     DASHBOARD PROTECTION
+  ========================== */
+  const token = localStorage.getItem(STORAGE_TOKEN);
+  if (user && token) {
     return <Dashboard user={user} onLogout={handleLogout} />;
   }
 
-  // Otherwise show authe card
+  /* =========================
+     LOGIN / REGISTER UI
+  ========================== */
   return (
     <div className="app-root">
       <div className="auth-card">
@@ -115,7 +151,6 @@ function App() {
               <label className="label">Username</label>
               <input
                 className="input"
-                placeholder="johndoe"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -128,7 +163,6 @@ function App() {
             <input
               className="input"
               type="email"
-              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -140,7 +174,6 @@ function App() {
             <input
               className="input"
               type="password"
-              placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -153,15 +186,7 @@ function App() {
         </form>
 
         {message && (
-          <p
-            style={{
-              textAlign: "center",
-              marginTop: "12px",
-              color: "#4b5563",
-            }}
-          >
-            {message}
-          </p>
+          <p style={{ textAlign: "center", marginTop: 12 }}>{message}</p>
         )}
       </div>
     </div>

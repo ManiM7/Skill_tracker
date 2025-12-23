@@ -560,3 +560,52 @@ body {
   color: #9ca3af;
   cursor: pointer; 
 }
+
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Bigger modal */
+.modal-card.modal-lg {
+  width: 520px;
+  padding: 28px;
+  border-radius: 14px;
+  background: white;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.modal-subtitle {
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.error-text {
+  color: red;
+  margin-top: 8px;
+}
